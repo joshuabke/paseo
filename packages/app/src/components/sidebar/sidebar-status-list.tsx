@@ -290,6 +290,12 @@ export function SidebarStatusWorkspaceList({
       }),
     [renderPinnedWorkspaceRow],
   );
+  // Same contract as project mode: vertical drags scroll the list, a clear horizontal intent
+  // still activates the sidebar's close pan. The phone navigation scrolls in here too.
+  const nativeScrollGestureProps = useMemo(
+    () => (parentGestureRef ? ({ simultaneousHandlers: parentGestureRef } as object) : undefined),
+    [parentGestureRef],
+  );
   const content = (
     <>
       {listTopContent ? <View style={styles.listTop}>{listTopContent}</View> : null}
@@ -353,6 +359,7 @@ export function SidebarStatusWorkspaceList({
     <View style={styles.container}>
       {platformIsNative ? (
         <NestableScrollContainer
+          {...nativeScrollGestureProps}
           style={styles.list}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
