@@ -9,6 +9,7 @@ const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 let defaultRenders = 0;
+const header = <div>Sidebar navigation</div>;
 function DefaultView() {
   defaultRenders++;
   return <div>Default sidebar</div>;
@@ -26,7 +27,7 @@ function Sidebar({ storage }: { storage: SidebarViewStorage }) {
     <SidebarViewFrame
       state={selection.state}
       fallback={fallback}
-      header={<div>Sidebar navigation</div>}
+      header={header}
       reload={selection.reload}
     >
       {view}

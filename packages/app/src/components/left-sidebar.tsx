@@ -645,8 +645,9 @@ function MobileSidebar({
     ),
     [navRows],
   );
-  const cappedNav = (
-    <SidebarNavScroll closeGestureRef={closeGestureRef}>{navRows}</SidebarNavScroll>
+  const cappedNav = useMemo(
+    () => <SidebarNavScroll closeGestureRef={closeGestureRef}>{navRows}</SidebarNavScroll>,
+    [closeGestureRef, navRows],
   );
 
   return (
