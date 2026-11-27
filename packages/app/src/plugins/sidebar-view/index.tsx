@@ -29,7 +29,16 @@ import { useSidebarViewSelection } from "./selection";
 const source = createPluginClientStateSource();
 const themeMapping = (theme: Theme) => ({ theme: toPluginTheme(theme) });
 
-export function SidebarViewSlot({ children, dismiss }: { children: ReactNode; dismiss(): void }) {
+export function SidebarViewSlot({
+  children,
+  dismiss,
+  header,
+}: {
+  children: ReactNode;
+  dismiss(): void;
+  /** Rendered above whatever replaces `children`: the plugin view, its loading or its error. */
+  header?: ReactNode;
+}) {
   const { t } = useTranslation();
   const installed = useInstalledPlugins();
   const { state, reload, setSelection, pending, error } = useSidebarViewSelection();
@@ -62,7 +71,7 @@ export function SidebarViewSlot({ children, dismiss }: { children: ReactNode; di
     </View>
   ) : null;
   return (
-    <SidebarViewFrame state={state} fallback={children} reload={reload}>
+    <SidebarViewFrame state={state} fallback={children} header={header} reload={reload}>
       {view}
     </SidebarViewFrame>
   );

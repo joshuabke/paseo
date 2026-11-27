@@ -10,23 +10,32 @@ export function SidebarViewFrame({
   state,
   fallback,
   children,
+  header,
   reload,
 }: {
   state: SidebarViewSelectionState;
   fallback: ReactNode;
   children: ReactNode;
+  header?: ReactNode;
   reload(): void;
 }) {
   const { t } = useTranslation();
-  if (state.status === "loading") return <SidebarAgentListSkeleton />;
+  if (state.status === "ready" && children == null) return fallback;
+  let body = children;
+  if (state.status === "loading") body = <SidebarAgentListSkeleton />;
   if (state.status === "error")
-    return (
+    body = (
       <View style={styles.failure}>
         <Text style={styles.text}>{t("sidebar.view.readFailed")}</Text>
         <Button onPress={reload}>{t("common.actions.retry")}</Button>
       </View>
     );
-  return children ?? fallback;
+  return (
+    <>
+      {header}
+      {body}
+    </>
+  );
 }
 const styles = StyleSheet.create((theme) => ({
   failure: { padding: theme.spacing[4], gap: theme.spacing[3] },

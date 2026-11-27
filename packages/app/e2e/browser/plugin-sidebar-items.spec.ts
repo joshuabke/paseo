@@ -177,23 +177,31 @@ test.describe("Plugin sidebar items", () => {
     await cleanup();
   });
 
-  test("a short compact sidebar keeps workspaces usable while navigation scrolls", async ({
+  test("a short compact sidebar scrolls its navigation away with the workspaces", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 600 });
     await gotoAppShell(page);
     await page.getByRole("button", { name: "Open menu", exact: true }).first().click();
     await expect(botRow(page, "status")).toBeAttached();
+    const newWorkspace = visibleTestId(page, "sidebar-global-new-workspace");
     const workspace = visibleTestId(page, `sidebar-workspace-row-${getServerId()}:${workspaceId}`);
-    await expect(workspace).toBeInViewport({ ratio: 1 });
+    await expect(newWorkspace).toBeInViewport({ ratio: 1 });
+    await qaScreenshot(page, "compact-short-sidebar-top");
 
-    await test.step("scrolling navigation reaches its last row without moving workspaces", async () => {
-      const before = await boxOf(workspace);
-      await visibleTestId(page, "sidebar-global-new-workspace").hover();
+    await test.step("one scroll moves navigation and workspaces together", async () => {
+      const navBefore = await boxOf(newWorkspace);
+      const workspaceBefore = await boxOf(workspace);
+      await newWorkspace.hover();
       await page.mouse.wheel(0, 800);
-      await expect(botRow(page, "status")).toBeInViewport({ ratio: 1 });
+      await expect(newWorkspace).not.toBeInViewport();
       await expect(workspace).toBeInViewport({ ratio: 1 });
-      expect((await boxOf(workspace)).y).toBe(before.y);
+      const navShift = (await boxOf(newWorkspace)).y - navBefore.y;
+      const workspaceShift = (await boxOf(workspace)).y - workspaceBefore.y;
+      expect(navShift).toBeLessThan(0);
+      expect(workspaceShift).toBe(navShift);
+      await qaScreenshot(page, "compact-short-sidebar-scrolled");
+      await expect(botRow(page, "status")).toBeInViewport({ ratio: 1 });
       await botRow(page, "status").click();
       await expect(page.getByText("Bot status details", { exact: true })).toBeVisible();
       await page.getByRole("button", { name: "Close bot status", exact: true }).click();
@@ -346,7 +354,7 @@ test.describe("Plugin sidebar items", () => {
       const compactSync = footerItem(page, SHOWCASE_PLUGIN_ID, "sync");
       await expect(compactSync).toBeInViewport();
       await expectFooterRow(page, compactSync);
-      // The compact nav block is capped at half the sidebar and scrolls past it.
+      // The compact nav block scrolls with the workspace list, so the row may sit below the fold.
       const compactDeploys = headerRow(page, SHOWCASE_PLUGIN_ID, "deploys");
       await compactDeploys.scrollIntoViewIfNeeded();
       await expect(compactDeploys).toBeInViewport();

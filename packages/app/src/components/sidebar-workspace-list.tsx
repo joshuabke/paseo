@@ -248,6 +248,11 @@ interface SidebarWorkspaceListProps {
   // Rendered inside the scroll area, below the Pinned section and above the workspace
   // list. Holds the "Workspaces" section header so pinned items sit above it.
   listHeaderComponent?: ReactElement | null;
+  /**
+   * Rendered first in the scroll content, edge to edge and in every list state, so it scrolls
+   * away with the list. The phone sidebar puts its navigation here.
+   */
+  listTopContent?: ReactNode;
   /** Gesture ref for coordinating with parent gestures (e.g., sidebar close) */
   parentGestureRef?: MutableRefObject<GestureType | undefined>;
   dragGestureHostActive?: boolean;
@@ -1987,6 +1992,7 @@ export function SidebarWorkspaceList({
   onImportSession,
   listFooterComponent,
   listHeaderComponent,
+  listTopContent,
   parentGestureRef,
   dragGestureHostActive,
 }: SidebarWorkspaceListProps) {
@@ -2059,6 +2065,7 @@ export function SidebarWorkspaceList({
         onToggleWorkspacePin={onToggleWorkspacePin}
         onPinnedWorkspaceReorder={handlePinnedWorkspaceReorder}
         listHeaderComponent={listHeaderComponent}
+        listTopContent={listTopContent}
         sidebarFilterEmpty={sidebarFilterEmpty}
         parentGestureRef={parentGestureRef}
         dragGestureHostActive={dragGestureHostActive}
@@ -2077,6 +2084,7 @@ export function SidebarWorkspaceList({
         onImportSession={onImportSession}
         listFooterComponent={listFooterComponent}
         listHeaderComponent={listHeaderComponent}
+        listTopContent={listTopContent}
         sidebarFilterEmpty={sidebarFilterEmpty}
         hasActiveProjectFilter={hasActiveProjectFilter}
         parentGestureRef={parentGestureRef}
@@ -2111,6 +2119,7 @@ function SidebarGroupedModeList({
   onToggleWorkspacePin,
   onPinnedWorkspaceReorder,
   listHeaderComponent,
+  listTopContent,
   sidebarFilterEmpty,
   parentGestureRef,
   dragGestureHostActive,
@@ -2126,6 +2135,7 @@ function SidebarGroupedModeList({
   onToggleWorkspacePin: ToggleSidebarWorkspacePin;
   onPinnedWorkspaceReorder: (workspaces: SidebarWorkspacePlacement[]) => void;
   listHeaderComponent?: ReactElement | null;
+  listTopContent?: ReactNode;
   sidebarFilterEmpty: boolean;
   parentGestureRef?: MutableRefObject<GestureType | undefined>;
   dragGestureHostActive?: boolean;
@@ -2153,6 +2163,7 @@ function SidebarGroupedModeList({
       onToggleWorkspacePin={onToggleWorkspacePin}
       onPinnedWorkspaceReorder={onPinnedWorkspaceReorder}
       listHeaderComponent={listHeaderComponent}
+      listTopContent={listTopContent}
       sidebarFilterEmpty={sidebarFilterEmpty}
       parentGestureRef={parentGestureRef}
       dragGestureHostActive={dragGestureHostActive}
@@ -2173,6 +2184,7 @@ function ProjectModeList({
   onImportSession,
   listFooterComponent,
   listHeaderComponent,
+  listTopContent,
   sidebarFilterEmpty,
   hasActiveProjectFilter,
   parentGestureRef,
@@ -2598,6 +2610,7 @@ function ProjectModeList({
 
   const content = (
     <>
+      {listTopContent ? <View style={styles.listTop}>{listTopContent}</View> : null}
       {pinnedChats.length > 0 ? (
         <View style={styles.pinnedSection} testID="sidebar-pinned-section">
           <SidebarSectionHeader
@@ -2692,6 +2705,13 @@ const styles = StyleSheet.create((theme) => ({
     paddingTop: 2,
     // Room for the sidebar toast comes from SidebarToastClearance at the end of the content.
     paddingBottom: theme.spacing[4],
+  },
+  // Cancels listContent's padding so the top content runs edge to edge, and keeps the optical
+  // inset below it.
+  listTop: {
+    marginHorizontal: -theme.spacing[2],
+    marginTop: -2,
+    marginBottom: 2,
   },
   projectListContainer: {
     width: "100%",

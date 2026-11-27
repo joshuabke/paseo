@@ -623,12 +623,30 @@ function MobileSidebar({
     [insetsTop, insetsBottom, theme.colors.surfaceSidebar],
   );
 
-  const navRows = (
-    <SidebarNavRows
-      style={styles.mobileNavRowsGroup}
-      onBeforeNavigate={closeSidebar}
-      firstRowTrailing={closeButton}
-    />
+  const navRows = useMemo(
+    () => (
+      <SidebarNavRows
+        style={styles.mobileNavRowsGroup}
+        onBeforeNavigate={closeSidebar}
+        firstRowTrailing={closeButton}
+      />
+    ),
+    [closeSidebar, closeButton],
+  );
+  // The navigation is the top of the workspace list's scroll content, so the whole sidebar
+  // scrolls as one. Wherever the list is not mounted (first load, a plugin sidebar view) it
+  // falls back to the capped block above that content.
+  const listTopContent = useMemo(
+    () => (
+      <>
+        {navRows}
+        <SidebarSeparator testID="sidebar-nav-separator" />
+      </>
+    ),
+    [navRows],
+  );
+  const cappedNav = (
+    <SidebarNavScroll closeGestureRef={closeGestureRef}>{navRows}</SidebarNavScroll>
   );
 
   return (
@@ -639,12 +657,13 @@ function MobileSidebar({
     >
       <View style={styles.sidebarContent} pointerEvents="auto">
         <WindowChromeSafeArea placement="below" />
-        <SidebarNavScroll closeGestureRef={closeGestureRef}>{navRows}</SidebarNavScroll>
-
-        <SidebarViewSlot dismiss={handleWorkspacePress}>
+        <SidebarViewSlot dismiss={handleWorkspacePress} header={cappedNav}>
           <SidebarToastRegion active={active}>
             {isInitialLoad && !hasActiveHostFilter ? (
-              <SidebarAgentListSkeleton />
+              <>
+                {cappedNav}
+                <SidebarAgentListSkeleton />
+              </>
             ) : (
               <SidebarWorkspaceList
                 collapsedProjectKeys={collapsedProjectKeys}
@@ -665,6 +684,7 @@ function MobileSidebar({
                 onImportSession={handleImportSession}
                 parentGestureRef={closeGestureRef}
                 dragGestureHostActive={active}
+                listTopContent={listTopContent}
                 listHeaderComponent={workspacesSectionHeaderElement}
               />
             )}
@@ -692,8 +712,8 @@ interface SidebarNavScrollProps {
   children: ReactNode;
 }
 
-// The capped, scrolling nav block shared by the mobile and desktop sidebars, with the
-// divider below it. The divider is a sibling because Unistyles does not patch the
+// The capped, scrolling nav block of the desktop sidebar, and of the mobile one while its
+// workspace list is not mounted, with the divider below it. The divider is a sibling because Unistyles does not patch the
 // gesture-handler ScrollView.
 function SidebarNavScroll({ closeGestureRef, windowContent, children }: SidebarNavScrollProps) {
   return (

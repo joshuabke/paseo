@@ -128,6 +128,8 @@ interface StatusWorkspaceListProps {
   onToggleWorkspacePin: ToggleSidebarWorkspacePin;
   onPinnedWorkspaceReorder: (workspaces: SidebarWorkspaceEntry[]) => void;
   listHeaderComponent?: ReactNode;
+  /** See `SidebarWorkspaceListProps.listTopContent`. */
+  listTopContent?: ReactNode;
   /** Swaps the group list for the label filter's empty state. Never the header above it. */
   sidebarFilterEmpty?: boolean;
   parentGestureRef?: MutableRefObject<GestureType | undefined>;
@@ -146,6 +148,7 @@ export function SidebarStatusWorkspaceList({
   onToggleWorkspacePin,
   onPinnedWorkspaceReorder,
   listHeaderComponent,
+  listTopContent,
   sidebarFilterEmpty = false,
   parentGestureRef,
   dragGestureHostActive,
@@ -289,6 +292,7 @@ export function SidebarStatusWorkspaceList({
   );
   const content = (
     <>
+      {listTopContent ? <View style={styles.listTop}>{listTopContent}</View> : null}
       {pinnedWorkspaces.length > 0 ? (
         <View style={styles.pinnedSection} testID="sidebar-pinned-section">
           <SidebarSectionHeader
@@ -1196,6 +1200,12 @@ const styles = StyleSheet.create((theme) => ({
     paddingTop: 2,
     // Room for the sidebar toast comes from SidebarToastClearance at the end of the content.
     paddingBottom: theme.spacing[4],
+  },
+  // Same edge-to-edge top slot as the project list's `listTop`.
+  listTop: {
+    marginHorizontal: -theme.spacing[2],
+    marginTop: -2,
+    marginBottom: 2,
   },
   pinnedSection: {
     marginBottom: theme.spacing[1],
